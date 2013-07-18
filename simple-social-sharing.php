@@ -3,8 +3,8 @@
 Plugin Name: Simple Social Sharing
 Plugin URI: http://andrewnorcross.com/plugins/simple-social-sharing
 Description: A simple, straightforward post footer to allow readers to share your content using pure HTML / CSS. Now includes an options panel.
-Version: 1.24
-Author: Andrew Norcross, Mandeep Singh
+Version: 1.3
+Author: Andrew Norcross, Mandeep Singh, Rami Abraham
 Author URI: http://andrewnorcross.com
 */
 
@@ -24,52 +24,57 @@ Author URI: http://andrewnorcross.com
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+
 add_action('admin_menu', 'social_sharing_create_menu');
 
-function social_sharing_create_menu() {
+if ( ! function_exists('social_sharing_create_menu')) {
 
-	//create new top-level menu
-	add_options_page('Simple Social Sharing', 'Simple Social Sharing', 'manage_options', __FILE__, 'social_sharing_settings_page');
-	add_filter( "plugin_action_links", "sss_settings_link", 10, 2 );
-	//call register settings function
-	add_action( 'admin_init', 'register_social_sharing' );
-}
+	function social_sharing_create_menu() {
+	
+		//create new top-level menu
+		add_options_page('Simple Social Sharing', 'Simple Social Sharing', 'manage_options', __FILE__, 'social_sharing_settings_page');
+		add_filter( "plugin_action_links", "sss_settings_link", 10, 2 );
+		//call register settings function
+		add_action( 'admin_init', 'register_social_sharing' );
+	}
+} // exists check
 
-function sss_settings_link($links, $file) {
-	static $this_plugin;
-		if (!$this_plugin) $this_plugin = plugin_basename(__FILE__);
-		if ($file == $this_plugin){
-	$settings_link = '<a href="options-general.php?page=simple-social-sharing/simple-social-sharing.php">'.__("Settings", "simple-social-sharing").'</a>';
-		array_unshift($links, $settings_link);
+	function sss_settings_link($links, $file) {
+		static $this_plugin;
+			if (!$this_plugin) $this_plugin = plugin_basename(__FILE__);
+			if ($file == $this_plugin){
+		$settings_link = '<a href="options-general.php?page=simple-social-sharing/simple-social-sharing.php">'.__("Settings", "simple-social-sharing").'</a>';
+			array_unshift($links, $settings_link);
+			}
+		return $links;
 		}
-	return $links;
+
+	function register_social_sharing() {
+		//register our settings
+		register_setting( 'social_sharing_group', 'soc_twitter_user' );
+		register_setting( 'social_sharing_group', 'soc_twitter_rec' );
+		register_setting( 'social_sharing_group', 'soc_posts' );
+		register_setting( 'social_sharing_group', 'soc_excerpts' );
+		register_setting( 'social_sharing_group', 'soc_pages' );
+		register_setting( 'social_sharing_group', 'soc_homep' );
+		register_setting( 'social_sharing_group', 'soc_sharetext' );
+		register_setting( 'social_sharing_group', 'soc_cssdark' );
 	}
 
-function register_social_sharing() {
-	//register our settings
-	register_setting( 'social_sharing_group', 'soc_twitter_user' );
-	register_setting( 'social_sharing_group', 'soc_twitter_rec' );
-	register_setting( 'social_sharing_group', 'soc_posts' );
-	register_setting( 'social_sharing_group', 'soc_excerpts' );
-	register_setting( 'social_sharing_group', 'soc_pages' );
-	register_setting( 'social_sharing_group', 'soc_homep' );
-	register_setting( 'social_sharing_group', 'soc_sharetext' );
-	register_setting( 'social_sharing_group', 'soc_cssdark' );
-}
+	function social_sharing_css_head() { ?>
+	<style type="text/css"  >
+	
+	.soshare {padding-top:15px;}
+	.soshare .setting {display:block;padding:1em;}
+	.soshare .setting p.label_title {font-size:12px;font-weight:bold;display:block;margin-bottom:5px;}
+	.soshare .setting label.no_bold {font-weight:normal;}
+	.soshare .setting label span.slim {width:200px;float:left;display:block;margin: 1px;padding: 3px;}
+	.soshare .setting p.desc {font-size:10px;font-style:italic;text-indent:10px; text-align:left;}
+	</style>
+	
+	<?php }
 
-function social_sharing_css_head() { ?>
-<style type="text/css"  >
-
-.soshare {padding-top:15px;}
-.soshare .setting {display:block;padding:1em;}
-.soshare .setting p.label_title {font-size:12px;font-weight:bold;display:block;margin-bottom:5px;}
-.soshare .setting label.no_bold {font-weight:normal;}
-.soshare .setting label span.slim {width:200px;float:left;display:block;margin: 1px;padding: 3px;}
-.soshare .setting p.desc {font-size:10px;font-style:italic;text-indent:10px; text-align:left;}
-</style>
-
-<?php }
-add_action('admin_head', 'social_sharing_css_head');
+		add_action('admin_head', 'social_sharing_css_head');
 
 
 function social_sharing_settings_page() { ?>
@@ -85,7 +90,7 @@ function social_sharing_settings_page() { ?>
         <p class="label_title">Twitter User Info</p>
         <p><label class="no_bold" for="soc_twitter_user"><span class="slim"><?php _e('Twitter user name') ?></span>
 		<input name="soc_twitter_user" type="text" id="soc_twitter_user" value="<?php form_option('soc_twitter_user'); ?>" /></label></p>
-        <p class="desc">Enter your twitter username. No http:// or @ </p>
+        <p class="desc">Enter your twitter username. Just the username, no http:// or @ </p>
 
         <p><label class="no_bold" for="soc_twitter_rec"><span class="slim"><?php _e('Twitter Recommended User') ?></span>
 		<input name="soc_twitter_rec" type="text" id="soc_twitter_rec" value="<?php form_option('soc_twitter_rec'); ?>" /></label></p>
@@ -116,7 +121,7 @@ function social_sharing_settings_page() { ?>
 		</div>
 
 		<div class="setting">
-        <p class="label_title">Style / Layout Settings</p>
+        <p class="label_title">Style and Layout Settings</p>
 
         <p class="label_title">Twitter User Info</p>
         <p><label class="no_bold" for="soc_sharetext"><span class="slim"><?php _e('Leading Text') ?></span>

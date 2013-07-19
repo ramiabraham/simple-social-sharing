@@ -34,3 +34,5 @@ TO-DO:
 - [ ] Wrap in class
 - [ ] Exists check for class
 - [ ] Possibly more unicorns, or a penguin
+- [ ] register_setting as array
+- [ ] is_admin check

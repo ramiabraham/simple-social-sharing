@@ -26,3 +26,11 @@ Hover animation (slight wiggle):
 Example of totally great option to include animated gif of unicorns above the main plugin container:
 
 ![Image](/inc/example_unicorns.gif?raw=true)
+
+
+TO-DO:
+
+- [ ] Translation
+- [ ] Wrap in class
+- [ ] Exists check for class
+- [ ] Possibly more unicorns, or a penguin

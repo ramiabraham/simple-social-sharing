@@ -11,7 +11,7 @@ The original plugin is located here: http://wordpress.org/plugins/simple-social-
 - No javascript
 - No external calls at all, in fact.
 - Light options
-- Icons wiggle and whatnot
+- Icons wiggle and whatnot on :hover
 - No images
 - uses Genericons (http://genericons.com)
 

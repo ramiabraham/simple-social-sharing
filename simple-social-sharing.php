@@ -59,6 +59,7 @@ if ( ! function_exists('social_sharing_create_menu')) {
 		register_setting( 'social_sharing_group', 'soc_homep' );
 		register_setting( 'social_sharing_group', 'soc_sharetext' );
 		register_setting( 'social_sharing_group', 'soc_cssdark' );
+		register_setting( 'social_sharing_group', 'soc_show_unicorns' );
 	}
 
 	function social_sharing_css_head() { ?>
@@ -81,24 +82,25 @@ function social_sharing_settings_page() { ?>
 
 <div class="wrap soshare">
 <h2>Simple Social Sharing</h2>
-
+<p>No external files. No javascript. No images.* Minimal styling.</p>
 <form method="post" action="options.php">
     <?php settings_fields( 'social_sharing_group' ); ?>
 
 
         <div class="setting">
-        <p class="label_title">Twitter User Info</p>
-        <p><label class="no_bold" for="soc_twitter_user"><span class="slim"><?php _e('Twitter user name') ?></span>
-		<input name="soc_twitter_user" type="text" id="soc_twitter_user" value="<?php form_option('soc_twitter_user'); ?>" /></label></p>
+        <h3 class="label_title">Twitter User Info:</h3>
         <p class="desc">Enter your twitter username. Just the username, no http:// or @ </p>
-
-        <p><label class="no_bold" for="soc_twitter_rec"><span class="slim"><?php _e('Twitter Recommended User') ?></span>
+        <p><label class="no_bold" for="soc_twitter_user"><span class="slim"><?php _e('Twitter username:') ?></span>
+		<input name="soc_twitter_user" type="text" id="soc_twitter_user" value="<?php form_option('soc_twitter_user'); ?>" /></label></p>
+        
+		<p class="desc">Optional. Add a second username to "recommend" after a visitor tweets.</p>
+        <p><label class="no_bold" for="soc_twitter_rec"><span class="slim"><?php _e('Twitter Recommended User:') ?></span>
 		<input name="soc_twitter_rec" type="text" id="soc_twitter_rec" value="<?php form_option('soc_twitter_rec'); ?>" /></label></p>
-        <p class="desc">Optional. Add a second username to "recommend" after a visitor tweets.</p>
+        
         </div>
 
 		<div class="setting">
-        <p class="label_title">Post / Page Settings</p>
+        <h3 class="label_title">Post / Page Settings:</h3>
         <fieldset><legend class="screen-reader-text"><span><?php _e('Post / Page Settings') ?></span></legend>
 
         <p><label class="no_bold" for="soc_homep">
@@ -121,18 +123,29 @@ function social_sharing_settings_page() { ?>
 		</div>
 
 		<div class="setting">
-        <p class="label_title">Style and Layout Settings</p>
+        <h3 class="label_title">Style and Layout Settings</h3>
 
-        <p class="label_title">Twitter User Info</p>
-        <p><label class="no_bold" for="soc_sharetext"><span class="slim"><?php _e('Leading Text') ?></span>
+        <p class="desc">Enter any leading text before the icons, i.e. "Share This"</p>
+        <p><label class="no_bold" for="soc_sharetext"><span class="slim"><?php _e('Leading Text:') ?></span>
 
 		<input name="soc_sharetext" type="text" id="soc_sharetext" value="<?php form_option('soc_sharetext'); ?>"  /></label></p>
-        <p class="desc">Enter any leading text before the icons, i.e. "Share This"</p>
+        
 
         <p><label class="no_bold" for="soc_cssdark">
         <input name="soc_cssdark" type="checkbox" id="soc_cssdark" value="yes" <?php checked('yes', get_option('soc_cssdark')); ?> />
-        <?php _e('Load optional "dark" CSS (for themes with black backgrounds and white lettering)') ?></label></p>
+        <?php _e('Load optional "dark" CSS? (for themes with black backgrounds and white lettering)') ?></label></p>
+		</div>
+		
+		<div class="setting">
 
+		<h3 class="label_title">Optional unicorn gifs:</h3>
+		<p class="desc">*Except this.</p>
+		<p><label class="no_bold" for="soc_show_unicorns">
+        <input name="soc_show_unicorns" type="checkbox" id="soc_show_unicorns" value="yes" <?php checked('yes', get_option('soc_show_unicorns')); ?> />
+        <?php _e('Would you like to show an animated gif of unicorns above the social icons?') ?></label></p>
+        
+
+		
         </fieldset>
         </div>
 
@@ -149,15 +162,25 @@ function social_sharing_settings_page() { ?>
 
 function sharing_css() {
 	if (get_option('soc_cssdark' ) == 'yes') {
-		wp_register_style( 'sss-style', plugins_url('simple-social-sharing-dark.css', __FILE__) );
+		wp_register_style( 'sss-style', plugins_url('inc/css/simple-social-sharing-dark.css', __FILE__) );
 	} else {
-		wp_register_style( 'sss-style', plugins_url('simple-social-sharing.css', __FILE__) );
+		wp_register_style( 'sss-style', plugins_url('inc/css/simple-social-sharing.css', __FILE__) );
 	}
 	// actually load the things
 	wp_enqueue_style( 'sss-style');
 }
 
 add_action( 'wp_print_styles', 'sharing_css' );
+
+function lets_get_them_corny_unicorns_css() {
+	if (get_option('soc_show_unicorns' ) == 'yes') {
+		wp_register_style( 'sss-unicorn-power-up', plugins_url('inc/css/unicorns.css', __FILE__) );
+	} else {}
+	// get them unicorns and whatnot
+	wp_enqueue_style( 'sss-unicorn-power-up');
+}
+
+add_action( 'wp_print_styles', 'lets_get_them_corny_unicorns_css' );
 
 // conditionals to display box
 
@@ -188,14 +211,14 @@ if (get_option('soc_twitter_rec' ))		{ $twitter_rec = '&amp;related='.get_option
 	// build share box
 	global $post;
 	if(empty($post->post_password)) :
-		$share_content .= '<div id="simple_socialmedia"><ul class="ssm_row">';
-		$share_content .= '<li class="twitter"><a target="_blank" href="http://twitter.com/share?url='.get_permalink().'&amp;text='.get_the_title().''.$twitter_name.''.$twitter_rec.'">Tweet</a></li>';
-		$share_content .= '<li class="facebook"><a target="_blank" title="Share on Facebook" rel="nofollow" href="http://www.facebook.com/sharer.php?u='.get_permalink().'&amp;t='.get_the_title().'">Facebook</a></li>';
-		$share_content .= '<li class="linkedin"><a target="_blank" title="Share on LinkedIn" rel="nofollow" href="http://www.linkedin.com/shareArticle?mini=true&amp;url='.get_permalink().'&amp;title='.get_the_title().'&amp;source='.get_bloginfo( 'name' ).'">LinkedIn</a></li>';
-		$share_content .= '<li class="tumblr"><a target="_blank" title="Share on Tumblr" rel="nofollow" href="http://www.tumblr.com/share/link?url='.urlencode(get_permalink() ).'&name='.urlencode(get_bloginfo('name')).'&description='.urlencode(get_the_title()).'" title="Share on Tumblr">Tumblr</a></li>';
-		$share_content .= '<li class="stumble"><a target="_blank" title="Share on StumbleUpon" rel="nofollow" href="http://www.stumbleupon.com/submit?url='.get_permalink().'">Stumble</a></li>';
-		$share_content .= '<li class="digg"><a target="_blank" title="Share on Digg" rel="nofollow" href="http://www.digg.com/submit?phase=2&amp;url='.get_permalink().'">Digg</a></li>';
-		$share_content .= '<li class="delicious"><a target="_blank" title="Share on Delicious" rel="nofollow" href="http://del.icio.us/post?url='.get_permalink().'&amp;title='.get_the_title().'">Delicious</a></li>';
+		$share_content .= '<div class="unicorns"></div><div id="simple_socialmedia"><ul class="ssm_row">';
+		$share_content .= '<li class="twitter sss-animated sss-wiggle"><a target="_blank" href="http://twitter.com/share?url='.get_permalink().'&amp;text='.get_the_title().''.$twitter_name.''.$twitter_rec.'"> Tweet</a></li>';
+		$share_content .= '<li class="facebook sss-animated sss-wiggle"><a target="_blank" title="Share on Facebook" rel="nofollow" href="http://www.facebook.com/sharer.php?u='.get_permalink().'&amp;t='.get_the_title().'"> Facebook</a></li>';
+		$share_content .= '<li class="linkedin sss-animated sss-wiggle"><a target="_blank" title="Share on LinkedIn" rel="nofollow" href="http://www.linkedin.com/shareArticle?mini=true&amp;url='.get_permalink().'&amp;title='.get_the_title().'&amp;source='.get_bloginfo( 'name' ).'"> LinkedIn</a></li>';
+		$share_content .= '<li class="tumblr sss-animated sss-wiggle"><a target="_blank" title="Share on Tumblr" rel="nofollow" href="http://www.tumblr.com/share/link?url='.urlencode(get_permalink() ).'&name='.urlencode(get_bloginfo('name')).'&description='.urlencode(get_the_title()).'" title="Share on Tumblr"> Tumblr</a></li>';
+		$share_content .= '<li class="pinterest sss-animated sss-wiggle"><a target="_blank" title="Share on your Pinboard" rel="nofollow" href="http://pinterest.com/pin/create/button/?url='.get_permalink().'&description='.get_the_title().'"> Pinterest</a></li>';
+		$share_content .= '<li class="googleplus sss-animated sss-wiggle"><a target="_blank" title="Share on Google Plus" rel="nofollow" href="https://plus.google.com/share?url='.get_permalink().'"> Google</a></li>';
+		$share_content .= '<li class="buffer sss-animated sss-wiggle"><a target="_blank" title="Share on Delicious" rel="nofollow" href="http://bufferapp.com/add?&text='.get_the_title().'&url='.get_permalink().'"> Buffer</a></li>';
 		$share_content .= '</ul></div>';
 	return $share_content;
 	endif;
@@ -211,15 +234,15 @@ if (get_option('soc_twitter_rec' ))		{ $twitter_rec = '&amp;related='.get_option
 	if(is_single()) {
 		global $post;
 		if(empty($post->post_password)) :
-		$share_content .= '<div id="simple_socialmedia"><ul class="ssm_row">';
+		$share_content .= '<div class="unicorns"></div><div id="simple_socialmedia"><ul class="ssm_row">';
 		$share_content .= $sharetext;
-		$share_content .= '<li class="twitter"><a target="_blank" href="http://twitter.com/share?url='.get_permalink().'&amp;text='.get_the_title().''.$twitter_name.''.$twitter_rec.'">Tweet</a></li>';
-		$share_content .= '<li class="facebook"><a target="_blank" title="Share on Facebook" rel="nofollow" href="http://www.facebook.com/sharer.php?u='.get_permalink().'&amp;t='.get_the_title().'">Facebook</a></li>';
-		$share_content .= '<li class="linkedin"><a target="_blank" title="Share on LinkedIn" rel="nofollow" href="http://www.linkedin.com/shareArticle?mini=true&amp;url='.get_permalink().'&amp;title='.get_the_title().'&amp;source='.get_bloginfo( 'name' ).'">LinkedIn</a></li>';
-		$share_content .= '<li class="tumblr"><a target="_blank" title="Share on Tumblr" rel="nofollow" href="http://www.tumblr.com/share/link?url='.urlencode(get_permalink() ).'&name='.urlencode(get_bloginfo('name')).'&description='.urlencode(get_the_title()).'" title="Share on Tumblr">Tumblr</a></li>';
-		$share_content .= '<li class="stumble"><a target="_blank" title="Share on StumbleUpon" rel="nofollow" href="http://www.stumbleupon.com/submit?url='.get_permalink().'">Stumble</a></li>';
-		$share_content .= '<li class="digg"><a target="_blank" title="Share on Digg" rel="nofollow" href="http://www.digg.com/submit?phase=2&amp;url='.get_permalink().'">Digg</a></li>';
-		$share_content .= '<li class="delicious"><a target="_blank" title="Share on Delicious" rel="nofollow" href="http://del.icio.us/post?url='.get_permalink().'&amp;title=INSERT_TITLE">Delicious</a></li>';
+		$share_content .= '<li class="twitter sss-animated sss-wiggle"><a target="_blank" href="http://twitter.com/share?url='.get_permalink().'&amp;text='.get_the_title().''.$twitter_name.''.$twitter_rec.'"> Tweet</a></li>';
+		$share_content .= '<li class="facebook sss-animated sss-wiggle"><a target="_blank" title="Share on Facebook" rel="nofollow" href="http://www.facebook.com/sharer.php?u='.get_permalink().'&amp;t='.get_the_title().'"> Facebook</a></li>';
+		$share_content .= '<li class="linkedin sss-animated sss-wiggle"><a target="_blank" title="Share on LinkedIn" rel="nofollow" href="http://www.linkedin.com/shareArticle?mini=true&amp;url='.get_permalink().'&amp;title='.get_the_title().'&amp;source='.get_bloginfo( 'name' ).'"> LinkedIn</a></li>';
+		$share_content .= '<li class="tumblr sss-animated sss-wiggle"><a target="_blank" title="Share on Tumblr" rel="nofollow" href="http://www.tumblr.com/share/link?url='.urlencode(get_permalink() ).'&name='.urlencode(get_bloginfo('name')).'&description='.urlencode(get_the_title()).'" title="Share on Tumblr"> Tumblr</a></li>';
+		$share_content .= '<li class="pinterest sss-animated sss-wiggle"><a target="_blank" title="Share on your Pinboard" rel="nofollow" href="http://pinterest.com/pin/create/button/?url='.get_permalink().'&description='.get_the_title().'"> Pinterest</a></li>';
+		$share_content .= '<li class="googleplus sss-animated sss-wiggle"><a target="_blank" title="Share on Google Plus" rel="nofollow" href="https://plus.google.com/share?url='.get_permalink().'"> Google</a></li>';
+		$share_content .= '<li class="buffer sss-animated sss-wiggle"><a target="_blank" title="Share on Delicious" rel="nofollow" href="http://bufferapp.com/add?&text='.get_the_title().'&url='.get_permalink().'"> Buffer</a></li>';
 		$share_content .= '</ul></div>';
 		endif;
 	}
@@ -237,15 +260,15 @@ if (get_option('soc_twitter_rec' ))		{ $twitter_rec = '&amp;related='.get_option
 	if(is_page()) {
 	global $post;
 	if(empty($post->post_password)) :
-		$share_content .= '<div id="simple_socialmedia"><ul class="ssm_row">';
+		$share_content .= '<div class="unicorns"></div><div id="simple_socialmedia"><ul class="ssm_row">';
 		$share_content .= $sharetext;
-		$share_content .= '<li class="twitter"><a target="_blank" href="http://twitter.com/share?url='.get_permalink().'&amp;text='.get_the_title().''.$twitter_name.''.$twitter_rec.'">Tweet</a></li>';
-		$share_content .= '<li class="facebook"><a target="_blank" title="Share on Facebook" rel="nofollow" href="http://www.facebook.com/sharer.php?u='.get_permalink().'&amp;t='.get_the_title().'">Facebook</a></li>';
-		$share_content .= '<li class="linkedin"><a target="_blank" title="Share on LinkedIn" rel="nofollow" href="http://www.linkedin.com/shareArticle?mini=true&amp;url='.get_permalink().'&amp;title='.get_the_title().'&amp;source='.get_bloginfo( 'name' ).'">LinkedIn</a></li>';
-		$share_content .= '<li class="tumblr"><a target="_blank" title="Share on Tumblr" rel="nofollow" href="http://www.tumblr.com/share/link?url='.urlencode(get_permalink() ).'&name='.urlencode(get_bloginfo('name')).'&description='.urlencode(get_the_title()).'" title="Share on Tumblr">Tumblr</a></li>';
-		$share_content .= '<li class="stumble"><a target="_blank" title="Share on StumbleUpon" rel="nofollow" href="http://www.stumbleupon.com/submit?url='.get_permalink().'">Stumble</a></li>';
-		$share_content .= '<li class="digg"><a target="_blank" title="Share on Digg" rel="nofollow" href="http://www.digg.com/submit?phase=2&amp;url='.get_permalink().'">Digg</a></li>';
-		$share_content .= '<li class="delicious"><a target="_blank" title="Share on Delicious" rel="nofollow" href="http://del.icio.us/post?url='.get_permalink().'&amp;title=INSERT_TITLE">Delicious</a></li>';
+		$share_content .= '<li class="twitter sss-animated sss-wiggle"><a target="_blank" href="http://twitter.com/share?url='.get_permalink().'&amp;text='.get_the_title().''.$twitter_name.''.$twitter_rec.'"> Tweet</a></li>';
+		$share_content .= '<li class="facebook sss-animated sss-wiggle"><a target="_blank" title="Share on Facebook" rel="nofollow" href="http://www.facebook.com/sharer.php?u='.get_permalink().'&amp;t='.get_the_title().'"> Facebook</a></li>';
+		$share_content .= '<li class="linkedin sss-animated sss-wiggle"><a target="_blank" title="Share on LinkedIn" rel="nofollow" href="http://www.linkedin.com/shareArticle?mini=true&amp;url='.get_permalink().'&amp;title='.get_the_title().'&amp;source='.get_bloginfo( 'name' ).'"> LinkedIn</a></li>';
+		$share_content .= '<li class="tumblr sss-animated sss-wiggle"><a target="_blank" title="Share on Tumblr" rel="nofollow" href="http://www.tumblr.com/share/link?url='.urlencode(get_permalink() ).'&name='.urlencode(get_bloginfo('name')).'&description='.urlencode(get_the_title()).'" title="Share on Tumblr"> Tumblr</a></li>';
+		$share_content .= '<li class="pinterest sss-animated sss-wiggle"><a target="_blank" title="Share on your Pinboard" rel="nofollow" href="http://pinterest.com/pin/create/button/?url='.get_permalink().'&description='.get_the_title().'"> Pinterest</a></li>';
+		$share_content .= '<li class="googleplus sss-animated sss-wiggle"><a target="_blank" title="Share on Google Plus" rel="nofollow" href="https://plus.google.com/share?url='.get_permalink().'"> Google</a></li>';
+		$share_content .= '<li class="buffer sss-animated sss-wiggle"><a target="_blank" title="Share on Delicious" rel="nofollow" href="http://bufferapp.com/add?&text='.get_the_title().'&url='.get_permalink().'"> Buffer</a></li>';
 		$share_content .= '</ul></div>';
 		endif;
 	}
@@ -262,15 +285,15 @@ if (get_option('soc_twitter_rec' ))		{ $twitter_rec = '&amp;related='.get_option
 	if( !is_single() && !is_page() ) {
 	global $post;
 	if(empty($post->post_password)) :
-		$share_content .= '<div id="simple_socialmedia"><ul class="ssm_row">';
+		$share_content .= '<div class="unicorns"></div><div id="simple_socialmedia"><ul class="ssm_row">';
 		$share_content .= $sharetext;
-		$share_content .= '<li class="twitter"><a target="_blank" href="http://twitter.com/share?url='.get_permalink().'&amp;text='.get_the_title().''.$twitter_name.''.$twitter_rec.'">Tweet</a></li>';
-		$share_content .= '<li class="facebook"><a target="_blank" title="Share on Facebook" rel="nofollow" href="http://www.facebook.com/sharer.php?u='.get_permalink().'&amp;t='.get_the_title().'">Facebook</a></li>';
-		$share_content .= '<li class="linkedin"><a target="_blank" title="Share on LinkedIn" rel="nofollow" href="http://www.linkedin.com/shareArticle?mini=true&amp;url='.get_permalink().'&amp;title='.get_the_title().'&amp;source='.get_bloginfo( 'name' ).'">LinkedIn</a></li>';
-		$share_content .= '<li class="tumblr"><a target="_blank" title="Share on Tumblr" rel="nofollow" href="http://www.tumblr.com/share/link?url='.urlencode(get_permalink() ).'&name='.urlencode(get_bloginfo('name')).'&description='.urlencode(get_the_title()).'" title="Share on Tumblr">Tumblr</a></li>';
-		$share_content .= '<li class="stumble"><a target="_blank" title="Share on StumbleUpon" rel="nofollow" href="http://www.stumbleupon.com/submit?url='.get_permalink().'">Stumble</a></li>';
-		$share_content .= '<li class="digg"><a target="_blank" title="Share on Digg" rel="nofollow" href="http://www.digg.com/submit?phase=2&amp;url='.get_permalink().'">Digg</a></li>';
-		$share_content .= '<li class="delicious"><a target="_blank" title="Share on Delicious" rel="nofollow" href="http://del.icio.us/post?url='.get_permalink().'&amp;title=INSERT_TITLE">Delicious</a></li>';
+		$share_content .= '<li class="twitter sss-animated sss-wiggle"><a target="_blank" href="http://twitter.com/share?url='.get_permalink().'&amp;text='.get_the_title().''.$twitter_name.''.$twitter_rec.'"> Tweet</a></li>';
+		$share_content .= '<li class="facebook sss-animated sss-wiggle"><a target="_blank" title="Share on Facebook" rel="nofollow" href="http://www.facebook.com/sharer.php?u='.get_permalink().'&amp;t='.get_the_title().'"> Facebook</a></li>';
+		$share_content .= '<li class="linkedin sss-animated sss-wiggle"><a target="_blank" title="Share on LinkedIn" rel="nofollow" href="http://www.linkedin.com/shareArticle?mini=true&amp;url='.get_permalink().'&amp;title='.get_the_title().'&amp;source='.get_bloginfo( 'name' ).'"> LinkedIn</a></li>';
+		$share_content .= '<li class="tumblr sss-animated sss-wiggle"><a target="_blank" title="Share on Tumblr" rel="nofollow" href="http://www.tumblr.com/share/link?url='.urlencode(get_permalink() ).'&name='.urlencode(get_bloginfo('name')).'&description='.urlencode(get_the_title()).'" title="Share on Tumblr"> Tumblr</a></li>';
+		$share_content .= '<li class="pinterest sss-animated sss-wiggle"><a target="_blank" title="Share on your Pinboard" rel="nofollow" href="http://pinterest.com/pin/create/button/?url='.get_permalink().'&description='.get_the_title().'"> Pinterest</a></li>';
+		$share_content .= '<li class="googleplus sss-animated sss-wiggle"><a target="_blank" title="Share on Google Plus" rel="nofollow" href="https://plus.google.com/share?url='.get_permalink().'"> Google</a></li>';
+		$share_content .= '<li class="buffer sss-animated sss-wiggle"><a target="_blank" title="Share on Delicious" rel="nofollow" href="http://bufferapp.com/add?&text='.get_the_title().'&url='.get_permalink().'"> Buffer</a></li>';
 		$share_content .= '</ul></div>';
 	endif;
 	}

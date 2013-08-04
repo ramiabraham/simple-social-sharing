@@ -5,7 +5,7 @@ Simple Static Social Sharing:
 
 The original plugin is located here: http://wordpress.org/plugins/simple-social-sharing/
  
-This version adds some  
+This version adds some front-end, like icons and a bit of css, updated social networks.
  
 #### Features:
 

@@ -1,10 +1,11 @@
-Simple Social Sharing 2:
-========================
-## The Quickening
+Simple Static Social Sharing:
+=============================
 
 #### This is a fork of the plugin 'Simple Social Sharing' by @norcross and Mandeep Singh
 
 The original plugin is located here: http://wordpress.org/plugins/simple-social-sharing/
+ 
+This version adds some  
  
 #### Features:
 
@@ -34,5 +35,5 @@ TO-DO:
 - [ ] Wrap in class
 - [ ] Exists check for class
 - [ ] Possibly more unicorns, or a penguin
-- [ ] register_setting as array
-- [ ] is_admin check
+- [ ] register_setting stuff as array
+- [ ] is_admin check here and there
